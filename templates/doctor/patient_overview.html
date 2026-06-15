@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+{% block title %}Patient Overview{% endblock %}
+{% block nav_patient_overview %}active{% endblock %}
+
+{% block extra_styles %}
+.overview-wrap {
+  max-width: 1460px;
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 32px 52px;
+  align-items: start;
+}
+
+h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  font-weight: 400;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  margin-bottom: 20px;
+  letter-spacing: 0.01em;
+}
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 22px 24px;
+  box-shadow: var(--shadow);
+}
+
+.bar-chart-wrap {
+  width: 100%;
+  height: 400px;
+  position: relative;
+}
+
+.right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.download-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.download-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.age-select {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 36px 10px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  cursor: pointer;
+  width: 100%;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8395' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  box-shadow: var(--shadow);
+}
+
+.age-select:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.download-btn {
+  background-color: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 11px 32px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+
+.download-btn:hover { opacity: 0.88; }
+
+.pie-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.pie-chart-wrap {
+  width: 100%;
+  height: 250px;
+  position: relative;
+}
+
+@media (max-width: 900px) {
+  .bar-chart-wrap {
+    height: 340px;
+  }
+
+  .overview-wrap {
+    grid-template-columns: 1fr;
+  }
+}
+{% endblock %}
+
+{% block content %}
+<div class="page-content top">
+  <div class="overview-wrap">
+    <div>
+      <h2>Performance by Age Bracket</h2>
+      <div class="chart-card">
+        <div class="bar-chart-wrap">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div>
+        <h2>Download Spreadsheet</h2>
+        <div class="download-section">
+          <form method="get" class="download-form" id="overview-filter-form">
+            <div class="form-group">
+              <label for="test-id">Select Test</label>
+              <select id="test-id" name="test_id" class="age-select">
+                <option value="" {% if not selected_test_id %}selected{% endif %}>All Tests</option>
+                {% if completed_tests_for_select %}
+                  {% for bracket_group in completed_tests_for_select %}
+                  <optgroup label="{{ bracket_group.label }}">
+                    {% for test_item in bracket_group.tests %}
+                    <option value="{{ test_item.id }}" {% if selected_test_id == test_item.id|stringformat:"s" %}selected{% endif %}>
+                      Test #{{ test_item.id }} (Age {{ test_item.patient_age }}) - {{ test_item.mean_accuracy }}%
+                    </option>
+                    {% endfor %}
+                  </optgroup>
+                  {% endfor %}
+                {% else %}
+                  <option value="" disabled>No valid tests available</option>
+                {% endif %}
+              </select>
+            </div>
+            <button type="button" class="download-btn" onclick="handleDownload()">Download</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="pie-card">
+        <h2>Detailed Performance Metrics</h2>
+        <div class="pie-chart-wrap">
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+{{ performance_data|json_script:"performance-data" }}
+{{ performance_bands|json_script:"performance-bands" }}
+<script>
+  const performanceData = JSON.parse(document.getElementById('performance-data').textContent);
+  const performanceBands = JSON.parse(document.getElementById('performance-bands').textContent);
+  const overviewFilterForm = document.getElementById('overview-filter-form');
+  const testSelect = document.getElementById('test-id');
+  const overviewExportUrl = "{% url 'doctor:patient_overview_export' %}";
+
+  function submitOverviewFilters() {
+    if (overviewFilterForm) {
+      overviewFilterForm.submit();
+    }
+  }
+
+  if (testSelect) {
+    testSelect.addEventListener('change', submitOverviewFilters);
+  }
+
+  function handleDownload() {
+    const params = new URLSearchParams();
+    if (testSelect && testSelect.value) {
+      params.set('test_id', testSelect.value);
+    }
+
+    const query = params.toString();
+    window.location.href = query ? `${overviewExportUrl}?${query}` : overviewExportUrl;
+  }
+
+  // Bar Chart
+  const barCtx = document.getElementById('barChart');
+  if (barCtx) {
+    const barLabels = performanceData.map((item) => item.label);
+    const referenceValues = performanceData.map((item) => item.reference_mean);
+    const observedValues = performanceData.map((item) => item.observed_accuracy);
+    const selectedTestValues = performanceData.map((item) => item.selected_test_accuracy);
+
+    const barDatasets = [
+      {
+        label: 'Average Trial Accuracy (%)',
+        data: referenceValues,
+        backgroundColor: '#2980b9',
+        borderRadius: 4,
+        borderSkipped: false,
+      },
+      {
+        label: 'Exact Match Rate (%)',
+        data: observedValues,
+        backgroundColor: '#9dc3de',
+        borderRadius: 4,
+        borderSkipped: false,
+      },
+    ];
+
+    const hasSelectedTestSeries = selectedTestValues.some((value) => value !== null && value !== undefined);
+    if (hasSelectedTestSeries) {
+      barDatasets.push({
+        label: 'Selected Test Accuracy (%)',
+        data: selectedTestValues,
+        backgroundColor: '#16a085',
+        borderRadius: 4,
+        borderSkipped: false,
+      });
+    }
+
+    new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: barLabels,
+        datasets: barDatasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              font: { family: 'DM Sans', size: 12 },
+              color: '#1a1f2e',
+              padding: 16
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              color: '#7a8395',
+              font: { family: 'DM Sans', size: 12 }
+            },
+            grid: { color: '#dce1ea' }
+          },
+          x: {
+            ticks: {
+              color: '#7a8395',
+              font: { family: 'DM Sans', size: 12 }
+            },
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+
+  // Pie Chart
+  const pieCtx = document.getElementById('pieChart');
+  if (pieCtx) {
+    const pieLabels = Object.keys(performanceBands);
+    const pieValues = Object.values(performanceBands);
+
+    new Chart(pieCtx, {
+      type: 'doughnut',
+      data: {
+        labels: pieLabels,
+        datasets: [{
+          data: pieValues,
+          backgroundColor: ['#00b894', '#2980b9', '#f39c12', '#e74c3c'],
+          borderColor: '#fff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '58%',
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              font: { family: 'DM Sans', size: 11 },
+              color: '#1a1f2e',
+              boxWidth: 10,
+              padding: 10
+            }
+          }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

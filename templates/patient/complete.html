@@ -1,0 +1,129 @@
+{% extends "patient/base_patient.html" %}
+{% block title %}Test Complete{% endblock %}
+
+{% block nav %}
+<nav>
+  <a class="nav-brand" href="{% url 'home' %}">
+    <span class="brain-icon">🧠</span> PPST
+  </a>
+  <a class="nav-link" id ="nav-home" href="{% url 'home' %}">Home</a>
+  <a class="nav-link" id="nav-about" href="{% url 'about' %}">About</a>
+  <a class="nav-link active" id="nav-complete" href="{% url 'patient:complete' test.id %}">Test Complete</a>
+  <div class="nav-spacer"></div>
+  <button class="btn-nav-outline" id ="patient-access-btn">Patient Access</button>
+</nav>
+{% endblock %}
+
+{% block content %}
+<style>
+  /* High Contrast Mode Coloring */
+  body.high-contrast {
+    --bg: #000000;
+    --white: #000000;
+    --charcoal: #ffffff;
+    --mid: #ffffff;
+    --muted: #cccccc;
+    --border: #ffffff;
+    --blue: #ffff00;
+    --blue-dark: #ffcc00;
+    --blue-light: #333300;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  body.high-contrast .page-content {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  body.high-contrast .hero-title {
+    color: #ffffff !important;
+  }
+
+  body.high-contrast nav {
+    background-color: #000000 !important;
+    border-bottom: 2px solid #ffffff !important;
+  }
+
+  body.high-contrast .nav-brand,
+  body.high-contrast .nav-link,
+  body.high-contrast .btn-nav-outline {
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+  }
+
+  body.high-contrast .btn-nav-outline {
+    background-color: #000000 !important;
+    border: 2px solid #ffffff !important;
+  }
+
+  body.high-contrast .btn-nav-outline:hover {
+    background-color: #ffff00 !important;
+    color: #000000 !important;
+  }
+</style>
+
+<div class="page-content" style="text-align:center;">
+  <div style="font-size:4rem; margin-bottom:1rem;">✅</div>
+  <h1 class="hero-title" id="page-title">Philadelphia Pointing Span Test</h1>
+  <p id = "complete-message" style="font-size:1.15rem; color:var(--blue); font-weight:600; margin-bottom:.8rem;">
+    Your test is complete!
+  </p>
+  <p id="complete-description" style="color:var(--mid); max-width:380px; line-height:1.7;">
+    You may safely close this browser now. Consult with your doctor for your next steps for care.
+  </p>
+</div>
+
+<script>
+// Apply high contrast mode if enabled
+document.addEventListener('DOMContentLoaded', function() {
+    const isHighContrast = localStorage.getItem('ppst-high-contrast') === 'true';
+    if (isHighContrast) {
+        document.body.classList.add('high-contrast');
+    }
+
+    const savedLanguage = localStorage.getItem('ppst-language') || 'ENG';
+
+    const translations = {
+        ENG: {
+            navHome: "Home",
+            navAbout: "About",
+            navComplete: "Test Complete",
+            patientAccess: "Patient Access",
+            pageTitle: "Philadelphia Pointing Span Test",
+            completeMessage: "Your test is complete!",
+            completeDescription: "You may safely close this browser now. Consult with your doctor for your next steps for care."
+        },
+        ESP: {
+            navHome: "Inicio",
+            navAbout: "Acerca de",
+            navComplete: "Prueba completada",
+            patientAccess: "Acceso del paciente",
+            pageTitle: "Prueba de amplitud de señalamiento de Filadelfia",
+            completeMessage: "¡Su prueba está completa!",
+            completeDescription: "Ahora puede cerrar este navegador de forma segura. Consulte con su médico para los próximos pasos de su atención."
+        },
+        FRE: {
+            navHome: "Page d'accueil",
+            navAbout: "À propos de",
+            navComplete: "Test terminé",
+            patientAccess: "Accès des patients",
+            pageTitle: "Test de portée de signalisation de Philadelphie", //or Évaluation cognitive numérique de Philadelphie
+            completeMessage: "Votre test est terminé!",
+            completeDescription: "Vous pouvez maintenant fermer ce navigateur sans risque. Consultez votre médecin pour connaître la suite de votre prise en charge." //check
+        }
+    };
+
+    const text = translations[savedLanguage] || translations.ENG;
+
+    document.getElementById('nav-home').textContent = text.navHome;
+    document.getElementById('nav-about').textContent = text.navAbout;
+    document.getElementById('nav-complete').textContent = text.navComplete;
+    document.getElementById('patient-access-btn').textContent = text.patientAccess;
+    document.getElementById('page-title').textContent = text.pageTitle;
+    document.getElementById('complete-message').textContent = text.completeMessage;
+    document.getElementById('complete-description').textContent = text.completeDescription;
+
+});
+</script>
+{% endblock %}

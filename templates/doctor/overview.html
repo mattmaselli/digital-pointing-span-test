@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Test Overview{% endblock %}
+{% block nav_test_overview %}active{% endblock %}
+
+{% block extra_styles %}
+.test-row {
+  display: flex; align-items: center; gap: 1rem;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .9rem 1.2rem;
+  margin-bottom: .7rem; box-shadow: var(--shadow);
+}
+.test-row .patient-id { font-weight: 600; min-width: 120px; }
+.test-meta { flex: 1; font-size: .88rem; color: var(--mid); }
+.show-more {
+  background: var(--border); border: none; border-radius: var(--radius);
+  padding: .5rem 1.2rem; font-size: .85rem; font-weight: 600;
+  color: var(--mid); cursor: pointer; margin-bottom: 1.5rem;
+  transition: background .15s; font-family: inherit;
+}
+.show-more:hover { background: #c8d0e0; }
+{% endblock %}
+
+{% block content %}
+<div class="page-content top">
+  <div style="width:100%; max-width:860px;">
+
+    <p class="section-title">Completed Tests</p>
+    {% for test in completed_tests %}
+    <div class="test-row">
+      <span class="patient-id">Patient {{ test.id }}</span>
+      <span class="badge badge-green">Completed</span>
+      <span class="test-meta">Time Taken: {{ test.duration }}</span>
+      <span style="color:var(--mid); font-size:.85rem;">See Results:</span>
+      <a class="btn btn-secondary btn-sm" href="{% url 'doctor:test_detail' test.id %}">Test Results</a>
+    </div>
+    {% empty %}
+    <p style="color:var(--muted); margin-bottom:1rem;">No completed tests yet.</p>
+    {% endfor %}
+    <button class="show-more">Show More</button>
+
+    <p class="section-title">Incomplete Tests</p>
+    {% for test in incomplete_tests %}
+    <div class="test-row">
+      <span class="patient-id">Patient {{ test.id }}</span>
+      <span class="badge badge-yellow">Incomplete</span>
+      <span class="test-meta">Time Taken: N/A</span>
+      <span style="color:var(--mid); font-size:.85rem;">See Results:</span>
+      <a class="btn btn-secondary btn-sm" href="{% url 'doctor:test_detail' test.id %}">Test Results</a>
+    </div>
+    {% empty %}
+    <p style="color:var(--muted); margin-bottom:1rem;">No incomplete tests.</p>
+    {% endfor %}
+    <button class="show-more">Show More</button>
+
+    <div style="text-align:center; margin-top:1.5rem;">
+      <a class="btn btn-secondary" style="padding:.85rem 3rem; font-size:1rem;" href="{% url 'doctor:create_test' %}">
+        Create a New Test
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

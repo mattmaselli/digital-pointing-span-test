@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block extra_styles %}
+.login-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(42,82,168,0.18);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50;
+}
+.login-modal {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.2rem 2rem 1.8rem;
+  width: 100%; max-width: 420px;
+  box-shadow: var(--shadow-lg);
+}
+.login-modal h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.9rem; margin-bottom: 1.4rem;
+}
+.login-modal .form-group { margin-bottom: 1rem; }
+.login-modal .hint {
+  font-size: .78rem; color: var(--muted); margin-top: .3rem;
+}
+.login-modal .row-between {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin: .9rem 0 1.2rem;
+  font-size: .83rem;
+}
+.login-modal .row-between label {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: .83rem; color: var(--mid);
+  font-weight: 400; cursor: pointer; margin: 0;
+}
+.login-modal .forgot { color: var(--blue); text-decoration: none; font-weight: 500; }
+.login-modal .forgot:hover { text-decoration: underline; }
+.login-modal .btn-login {
+  width: 100%; padding: .75rem;
+  background: var(--blue); color: #fff;
+  border: none; border-radius: var(--radius);
+  font-size: 1rem; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  transition: background .18s;
+}
+.login-modal .btn-login:hover { background: var(--blue-dark); }
+.login-modal .signup-link {
+  text-align: center; margin-top: 1.1rem;
+  font-size: .85rem; color: var(--mid);
+}
+.login-modal .signup-link a { color: var(--blue); font-weight: 500; text-decoration: none; }
+.login-modal .signup-link a:hover { text-decoration: underline; }
+{% endblock %}
+
+{% block content %}
+<!-- blurred home content behind the modal -->
+<div style="position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column;
+            align-items:center; justify-content:center; filter:blur(2px); user-select:none;"
+     aria-hidden="true">
+  <h1 class="hero-title">Philadelphia Pointing Span Test</h1>
+  <p class="hero-sub">
+    The PPST is a digital cognitive assessment designed to measure
+    functions such as memory, helping enhance early disease detection.
+  </p>
+</div>
+
+<div class="login-backdrop">
+  <div class="login-modal">
+    <h2>Log In</h2>
+
+    <form method="POST" action="{% url 'login' %}">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="l-email">Email Address</label>
+        <input type="text" id="l-email" name="username" placeholder="Placeholder" autocomplete="email"/>
+      </div>
+
+      <div class="form-group">
+        <label for="l-pass">Password</label>
+        <input type="password" id="l-pass" name="password" placeholder="Placeholder" autocomplete="current-password"/>
+        <p class="hint">It must be a combination of minimum 8 letters, numbers, and symbols.</p>
+      </div>
+
+      <div class="row-between">
+        <label>
+          <input type="checkbox" name="remember_me"/> Remember me
+        </label>
+        <a class="forgot" href="#">Forgot Password?</a>
+      </div>
+
+      {% if login_error %}
+        <p style="color:var(--red); margin-bottom:.8rem; font-size:.88rem;">{{ login_error }}</p>
+      {% endif %}
+
+      <button type="submit" class="btn-login">Log In</button>
+    </form>
+
+    <p class="signup-link">
+      No account yet? <a href="{% url 'register' %}">Sign Up</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

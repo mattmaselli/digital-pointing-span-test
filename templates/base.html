@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}PPST{% endblock %} – Philadelphia Pointing Span Test</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #3a6fd8;
+      --blue-dark:  #2a52a8;
+      --blue-light: #dce8fb;
+      --bg:         #f4f7fc;
+      --white:      #ffffff;
+      --charcoal:   #2d3142;
+      --mid:        #5a6175;
+      --muted:      #9ca3af;
+      --border:     #dde3ef;
+      --red:        #e05252;
+      --green:      #34a853;
+      --radius:     10px;
+      --shadow:     0 2px 12px rgba(58,111,216,0.10);
+      --shadow-lg:  0 8px 32px rgba(58,111,216,0.15);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--charcoal);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      box-shadow: var(--shadow);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: .6rem;
+      font-weight: 700; font-size: 1.1rem; color: var(--charcoal);
+      text-decoration: none; margin-right: .5rem;
+    }
+    .brain-icon { font-size: 1.5rem; }
+    .nav-link {
+      font-size: .92rem; font-weight: 500; color: var(--mid);
+      text-decoration: none; padding: .3rem .1rem;
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+    }
+    .nav-link:hover, .nav-link.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .nav-spacer { flex: 1; }
+    .nav-user { font-size: .85rem; font-weight: 600; color: var(--mid); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: .75rem 2.2rem; border-radius: var(--radius);
+      font-size: .95rem; font-weight: 600; cursor: pointer;
+      border: none; transition: all .18s; text-decoration: none;
+      font-family: inherit;
+    }
+    .btn-primary   { background: var(--blue);     color: #fff; }
+    .btn-primary:hover  { background: var(--blue-dark); transform: translateY(-1px); box-shadow: var(--shadow); }
+    .btn-secondary { background: var(--charcoal); color: #fff; }
+    .btn-secondary:hover { background: #1a1e2e; }
+    .btn-ghost { background: var(--white); color: var(--mid); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+    /* ── BUTTON PRESS FEEDBACK ── */
+    .btn:active {
+      transform: scale(0.93) !important;
+      filter: brightness(0.7);
+      transition: transform 0.05s ease, filter 0.05s ease;
+    }
+    .btn-sm { padding: .4rem 1rem; font-size: .82rem; border-radius: 7px; }
+    .btn-nav-outline {
+      padding: .4rem 1rem; border: 1.5px solid var(--border);
+      border-radius: var(--radius); background: var(--white);
+      color: var(--charcoal); font-size: .88rem; font-weight: 500;
+      cursor: pointer; transition: all .18s; font-family: inherit;
+    }
+    .btn-nav-outline:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-nav-solid {
+      padding: .4rem 1.1rem; background: var(--blue);
+      border: none; border-radius: var(--radius);
+      color: #fff; font-size: .88rem; font-weight: 600;
+      cursor: pointer; transition: background .18s; font-family: inherit;
+    }
+    .btn-nav-solid:hover { background: var(--blue-dark); }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      padding: .25rem .7rem; border-radius: 20px;
+      font-size: .78rem; font-weight: 600;
+    }
+    .badge-green  { background: #d4f0dc; color: #1a7a3a; }
+    .badge-yellow { background: #fef3c7; color: #92670a; }
+
+    /* ── PAGE CONTENT ── */
+    .page-content {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .page-content.top { justify-content: flex-start; padding-top: 2.5rem; }
+
+    /* ── TYPOGRAPHY ── */
+    .hero-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.6rem; color: var(--charcoal);
+      text-align: center; margin-bottom: 1.1rem;
+    }
+    .hero-sub {
+      max-width: 420px; text-align: center;
+      color: var(--mid); line-height: 1.7; margin-bottom: 2rem;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem; margin-bottom: 1rem;
+      border-bottom: 2px solid var(--charcoal);
+      padding-bottom: .4rem; display: inline-block;
+    }
+
+    /* ── FORM ── */
+    .form-box {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem 2rem 1.5rem;
+      margin-bottom: 1.5rem; box-shadow: var(--shadow);
+    }
+    .form-box h2 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; margin-bottom: 1.4rem; }
+    .form-row { display: flex; gap: 1rem; align-items: flex-end; }
+    .form-group { flex: 1; }
+    label { display: block; font-size: .82rem; font-weight: 600; color: var(--mid); margin-bottom: .4rem; }
+    input[type=text], input[type=password] {
+      width: 100%; padding: .65rem .9rem;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: .95rem; font-family: inherit;
+      background: var(--bg); color: var(--charcoal);
+      transition: border-color .18s;
+    }
+    input[type=text]:focus, input[type=password]:focus {
+      outline: none; border-color: var(--blue); background: var(--white);
+    }
+
+    /* ── LANGUAGE PILL ── */
+    .lang-pill {
+      position: fixed; bottom: 1.2rem; right: 1.5rem;
+      padding: .35rem .9rem; border: 1.5px solid var(--border);
+      border-radius: 20px; font-size: .82rem; font-weight: 600;
+      background: var(--white); color: var(--mid);
+      cursor: pointer; z-index: 200;
+    }
+
+    {% block extra_styles %}{% endblock %}
+  </style>
+  
+  
+    
+  
+</head>
+<body>
+
+  {% block nav %}
+<nav>
+  <a class="nav-brand" href="{% url 'home' %}">
+    <span class="brain-icon">🧠</span> PPST
+  </a>
+  <a class="nav-link {% block nav_home %}{% endblock %}" href="{% url 'home' %}">Home</a>
+  <a class="nav-link {% block nav_about %}{% endblock %}" href="{% url 'about' %}">About</a>
+  {% if request.user.is_authenticated %}
+    <a class="nav-link {% block nav_test_overview %}{% endblock %}" href="{% url 'doctor:dashboard' %}">Test Overview</a>
+    <a class="nav-link {% block nav_test_info %}{% endblock %}" href="{% url 'doctor:test_info' %}">Test Info</a>
+    <a class="nav-link {% block nav_patient_overview %}{% endblock %}" href="{% url 'doctor:patient_overview' %}">Patient Overview</a>    <div class="nav-spacer"></div>
+    <span class="nav-user">{{ request.user.username }}</span>
+    <a class="btn-nav-outline" href="{% url 'logout' %}">Logout</a>
+  {% else %}
+    <div class="nav-spacer"></div>
+    <a class="btn-nav-outline" href="{% url 'login' %}">Login</a>
+    <a class="btn-nav-solid" href="{% url 'register' %}">Register</a>
+  {% endif %}
+</nav>
+{% endblock %}
+
+  {% block content %}{% endblock %}
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

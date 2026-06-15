@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Test Info{% endblock %}
+{% block nav_test_info %}active{% endblock %}
+
+{% block extra_styles %}
+.info-wrap { max-width: 860px; width: 100%; margin: 0 auto; padding: 2.5rem 1.5rem; }
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.4rem;
+  border-bottom: 2px solid var(--charcoal);
+  padding-bottom: .4rem;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+{% endblock %}
+
+{% block content %}
+<div class="info-wrap">
+  <h2 class="section-title">Test Information</h2>
+  <div class="card">
+    <p style="color: var(--mid); font-size: .9rem;">
+      This page will contain data regarding the assigned tests taken. Edit if needed for future commits.
+    </p>
+  </div>
+</div>
+{% endblock %}

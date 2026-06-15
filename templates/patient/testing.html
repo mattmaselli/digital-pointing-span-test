@@ -1,0 +1,1162 @@
+{% extends "base.html" %}
+{% block title %}Take the Test{% endblock %}
+
+{% block nav %}
+<nav>
+  <a class="nav-brand" style="cursor: default;">
+    <span class="brain-icon">🧠</span> PPST
+  </a>
+
+  <div class="nav-spacer"></div>
+
+  <button class="btn-nav-outline" id="patient-access-btn" type="button">Patient Access</button>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="test-screen">
+  {% if is_practice %}
+  <div id="practice-label" style="
+    position: absolute;
+    top: 12px;
+    left: 18px;
+    font-size: .85rem;
+    color: #2d3142;
+    z-index: 50;
+  ">Practice {{ trial_index }} of {{ total_trials }}</div>
+  {% endif %}
+  <div id="stimulus-screen">
+    <div id="stimulus-symbol"></div>
+  </div>
+
+  <form method="post" id="trial-form" class="trial-form">
+    {% csrf_token %}
+    <input type="hidden" name="user_sequence" id="user_sequence">
+    <input type="hidden" name="response_latency" id="response_latency">
+    <input type="hidden" name="keystroke_log" id="keystroke_log">
+
+    <div id="response-phase" style="display: none;">
+      {% if trial.trial_type == "DIGIT" %}
+        <div class="response-layout response-layout-digit">
+          <div id="digit-keypad" class="keypad keypad-digit">
+            <button class="keypad-btn" type="button" data-symbol="0">0</button>
+            <button class="keypad-btn" type="button" data-symbol="1">1</button>
+            <button class="keypad-btn" type="button" data-symbol="2">2</button>
+            <button class="keypad-btn" type="button" data-symbol="3">3</button>
+            <button class="keypad-btn" type="button" data-symbol="4">4</button>
+
+            <button class="keypad-btn" type="button" data-symbol="5">5</button>
+            <button class="keypad-btn" type="button" data-symbol="6">6</button>
+            <button class="keypad-btn" type="button" data-symbol="7">7</button>
+            <button class="keypad-btn" type="button" data-symbol="8">8</button>
+            <button class="keypad-btn" type="button" data-symbol="9">9</button>
+          </div>
+        </div>
+
+        <div class="submit-row">
+          <button class="btn btn-primary submit-btn" type="submit" id="submit-btn">Submit</button>
+        </div>
+      {% else %}
+        <div class="response-layout response-layout-alpha">
+          <div class="alpha-group">
+            <div class="alpha-keypad-stack">
+              <div class="keypad keypad-alpha keypad-alpha-numbers">
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="0">0</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="1">1</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="2">2</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="3">3</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="4">4</button>
+
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="5">5</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="6">6</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="7">7</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="8">8</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="9">9</button>
+              </div>
+
+              <div class="keypad keypad-alpha keypad-alpha-letters">
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="A">A</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="C">C</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="F">F</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="H">H</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="L">L</button>
+
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="M">M</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="Q">Q</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="R">R</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="W">W</button>
+                <button class="keypad-btn keypad-btn-alpha" type="button" data-symbol="Y">Y</button>
+              </div>
+            </div>
+
+            <div class="alpha-submit-col">
+              <button class="btn btn-primary submit-btn submit-btn-side" type="submit" id="submit-btn-alpha">
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<style>
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .test-screen {
+    height: calc(100vh - 88px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 18px 14px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #stimulus-screen {
+    flex: 0 0 auto;
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  #stimulus-symbol {
+    font-size: 17rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+    min-width: 1ch;
+    text-align: center;
+  }
+
+  .trial-form {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+
+  #response-phase {
+    width: 100%;
+  }
+
+  .response-layout {
+    width: 100%;
+  }
+
+  .response-layout-digit {
+    display: block;
+  }
+
+  .response-layout-alpha {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .alpha-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 38px;
+    margin: 0 auto;
+    transform: translateY(-30px);
+  }
+
+  .alpha-keypad-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .alpha-submit-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 220px;
+    transform: translateY(-4px);
+  }
+
+  .keypad {
+    display: grid;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .keypad-digit {
+    grid-template-columns: repeat(5, 130px);
+    gap: 24px 34px;
+  }
+
+  .keypad-alpha {
+    grid-template-columns: repeat(5, 102px);
+    gap: 12px 18px;
+  }
+
+  .keypad-alpha-numbers {
+    margin-bottom: 44px;
+  }
+
+  .keypad-alpha-letters {
+    margin-top: 0;
+  }
+
+  .keypad-btn {
+    position: relative;
+    width: 130px;
+    height: 130px;
+    border: 2px solid #1f2937;
+    border-radius: 0;
+    background: linear-gradient(180deg, #ffffff 0%, #eef2f7 100%);
+    color: #111827;
+    font-size: 3.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 8px 0 #cbd5e1, 0 14px 28px rgba(15, 23, 42, 0.14);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease, border-color 0.12s ease, filter 0.12s ease;
+    will-change: transform, box-shadow;
+  }
+
+  .keypad-btn-alpha {
+    width: 102px;
+    height: 102px;
+    font-size: 2.85rem;
+  }
+
+  .keypad-btn:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #e5ebf3 100%);
+    border-color: #0f172a;
+  }
+
+  .keypad-btn:active,
+  .keypad-btn.is-pressed {
+    transform: translateY(6px) scale(0.99);
+    background: linear-gradient(180deg, #e5ebf3 0%, #dbe4ee 100%);
+    box-shadow: 0 2px 0 #cbd5e1, 0 6px 12px rgba(15, 23, 42, 0.14);
+    filter: saturate(0.96);
+  }
+
+  .keypad-btn.feedback-active {
+    background: linear-gradient(180deg, #c7d8ff 0%, #9ec5ff 100%);
+    border-color: #2563eb;
+    color: #0b1f49;
+  }
+
+  .submit-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+  }
+
+  .submit-btn {
+    min-width: 220px;
+    font-size: 1.25rem;
+    padding: 14px 34px;
+  }
+
+  .submit-btn.btn {
+    position: relative;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 8px 0 #1d4ed8, 0 16px 28px rgba(37, 99, 235, 0.28);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+    will-change: transform, box-shadow;
+  }
+
+  .submit-btn.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 0 #1d4ed8, 0 18px 30px rgba(37, 99, 235, 0.3);
+  }
+
+  .submit-btn.btn:active,
+  .submit-btn.btn.is-pressed {
+    transform: translateY(5px);
+    box-shadow: 0 3px 0 #1d4ed8, 0 8px 14px rgba(37, 99, 235, 0.24);
+    filter: saturate(0.95);
+  }
+
+  .submit-btn.btn.feedback-active {
+    background: #60a5fa;
+    box-shadow: 0 6px 0 #2563eb, 0 12px 22px rgba(96, 165, 250, 0.34);
+  }
+
+  .submit-btn-side {
+    min-width: 210px;
+    padding: 16px 26px;
+  }
+
+  .keypad-btn:focus-visible,
+  .submit-btn.btn:focus-visible {
+    outline: 4px solid rgba(37, 99, 235, 0.2);
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 1400px) {
+    .trial-form {
+      max-width: 1220px;
+    }
+
+    .keypad-digit {
+      grid-template-columns: repeat(5, 115px);
+      gap: 18px 24px;
+    }
+
+    .keypad-alpha {
+      grid-template-columns: repeat(5, 94px);
+      gap: 10px 14px;
+    }
+
+    .keypad-alpha-numbers {
+      margin-bottom: 18px;
+    }
+
+    .keypad-btn {
+      width: 115px;
+      height: 115px;
+      font-size: 3.2rem;
+    }
+
+    .keypad-btn-alpha {
+      width: 94px;
+      height: 94px;
+      font-size: 2.55rem;
+    }
+
+    .alpha-group {
+      gap: 26px;
+    }
+
+    .alpha-submit-col {
+      min-width: 190px;
+      transform: translateY(-28px);
+    }
+
+    .submit-btn-side {
+      min-width: 185px;
+      padding: 14px 22px;
+      font-size: 1.1rem;
+    }
+
+    #stimulus-symbol {
+      font-size: 6.2rem;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .test-screen {
+      padding: 8px 10px 12px;
+    }
+
+    .trial-form {
+      max-width: 980px;
+    }
+
+    .keypad-digit {
+      grid-template-columns: repeat(5, 95px);
+      gap: 14px 18px;
+    }
+
+    .keypad-alpha {
+      grid-template-columns: repeat(5, 78px);
+      gap: 8px 10px;
+    }
+
+    .keypad-alpha-numbers {
+      margin-bottom: 14px;
+    }
+
+    .keypad-btn {
+      width: 95px;
+      height: 95px;
+      font-size: 2.8rem;
+    }
+
+    .keypad-btn-alpha {
+      width: 78px;
+      height: 78px;
+      font-size: 2.15rem;
+    }
+
+    .alpha-group {
+      gap: 18px;
+    }
+
+    .alpha-submit-col {
+      min-width: 160px;
+      transform: translateY(-20px);
+    }
+
+    .submit-btn {
+      min-width: 180px;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+    }
+
+    .submit-btn-side {
+      min-width: 155px;
+      padding: 12px 16px;
+      font-size: 1rem;
+    }
+
+    #stimulus-screen {
+      min-height: 120px;
+      margin-bottom: 10px;
+    }
+
+    #stimulus-symbol {
+      font-size: 5.2rem;
+    }
+  }
+
+  @media (max-width: 800px) {
+    html, body {
+      overflow: auto;
+    }
+
+    .test-screen {
+      height: auto;
+      min-height: calc(100vh - 88px);
+      overflow: visible;
+    }
+
+    .alpha-group {
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .alpha-submit-col {
+      transform: none;
+      min-width: 0;
+    }
+
+    .keypad-digit,
+    .keypad-alpha {
+      grid-template-columns: repeat(4, 85px);
+      gap: 12px 14px;
+    }
+
+    .keypad-btn,
+    .keypad-btn-alpha {
+      width: 85px;
+      height: 85px;
+      font-size: 2.3rem;
+    }
+  }
+
+  .lang-pill {
+    display: none !important;
+  }
+
+  /* High Contrast Mode Coloring*/
+  body.high-contrast {
+    --bg: #000000;
+    --white: #000000;
+    --charcoal: #ffffff;
+    --mid: #ffffff;
+    --muted: #cccccc;
+    --border: #ffffff;
+    --blue: #ffff00;
+    --blue-dark: #ffcc00;
+    --blue-light: #333300;
+    --shadow: 0 2px 12px rgba(255,255,255,0.3);
+    --shadow-lg: 0 8px 32px rgba(255,255,255,0.4);
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  body.high-contrast .test-screen {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  body.high-contrast #stimulus-symbol {
+    color: #ffffff !important;
+  }
+
+  body.high-contrast .keypad-btn {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 3px solid #ffffff !important;
+    box-shadow: 0 0 0 2px #ffffff, 0 8px 0 #666666 !important;
+  }
+
+  body.high-contrast .keypad-btn:hover {
+    background: #333333 !important;
+    color: #ffffff !important;
+  }
+
+  body.high-contrast .keypad-btn:active,
+  body.high-contrast .keypad-btn.is-pressed {
+    background: #ffff00 !important;
+    color: #000000 !important;
+    transform: translateY(5px);
+    box-shadow: 0 0 0 2px #ffffff, 0 3px 0 #666666 !important;
+  }
+
+  body.high-contrast .keypad-btn-alpha {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 3px solid #ffffff !important;
+  }
+
+  body.high-contrast .submit-btn {
+    background: #ffff00 !important;
+    color: #000000 !important;
+    border: 3px solid #ffffff !important;
+    box-shadow: 0 0 0 2px #ffffff, 0 8px 0 #b38f00 !important;
+  }
+
+  body.high-contrast .submit-btn:hover {
+    background: #ffcc00 !important;
+    color: #000000 !important;
+  }
+
+  body.high-contrast .submit-btn:active,
+  body.high-contrast .submit-btn.is-pressed {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 2px #ffffff, 0 3px 0 #b38f00 !important;
+  }
+
+  body.high-contrast nav {
+    background-color: #000000 !important;
+    border-bottom: 2px solid #ffffff !important;
+  }
+
+  body.high-contrast .nav-brand,
+  body.high-contrast .nav-link,
+  body.high-contrast .btn-nav-outline {
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+  }
+
+  body.high-contrast .btn-nav-outline {
+    background-color: #000000 !important;
+    border: 2px solid #ffffff !important;
+  }
+
+  body.high-contrast .btn-nav-outline:hover {
+    background-color: #ffff00 !important;
+    color: #000000 !important;
+  }
+
+  body.high-contrast #practice-label {
+    color: #ffffff !important;
+  }
+</style>
+
+{{ trial.displayed_sequence|json_script:"sequence-data" }}
+
+<script>
+  const testId = "{{ test.id }}";
+  {% if is_practice %}
+  const abortUrl = null;
+  {% else %}
+  const abortUrl = `{% url 'patient:abort' test.id %}`;
+  {% endif %}
+  const displayedSequence = JSON.parse(
+    document.getElementById("sequence-data").textContent
+  );
+
+  const SYMBOL_DURATION_MS = 1500;
+  const SYMBOL_GAP_MS = 300;
+
+  const savedLanguage = localStorage.getItem('ppst-language') || 'ENG';
+
+  const uiTranslations = {
+  ENG: {
+    patientAccess: "Patient Access",
+    submit: "Submit",
+    practiceLabel: "Practice {{ trial_index }} of {{ total_trials }}"
+  },
+  ESP: {
+    patientAccess: "Acceso del paciente",
+    submit: "Enviar",
+    practiceLabel: "Práctica {{ trial_index }} de {{ total_trials }}"
+  },
+  FRE: {
+    patientAccess: "Accès patient",
+    submit: "Soumettre",
+    practiceLabel: "Pratique {{ trial_index }} sur {{ total_trials }}"
+  }
+};
+
+  let TTS_LANG = 'en-US';
+if (savedLanguage === 'ESP') {
+  TTS_LANG = 'es-ES';
+} else if (savedLanguage === 'FRE') {
+  TTS_LANG = 'fr-FR';
+}
+
+  const TTS_RATE = 0.75; // seems good but might have to play around with
+                         // English and Spanish voices slightly differ in rate inherently
+                         // may have to change at professor's request
+
+  let availableVoices=[];
+  let selectedVoice = null;
+
+  const stimulusSymbol = document.getElementById("stimulus-symbol");
+  const responsePhase = document.getElementById("response-phase");
+  const hiddenInput = document.getElementById("user_sequence");
+  const latencyInput = document.getElementById("response_latency");
+  const keystrokeLogInput = document.getElementById("keystroke_log");
+  const trialForm = document.getElementById("trial-form");
+  const keypadButtons = document.querySelectorAll(".keypad-btn");
+  const feedbackButtons = document.querySelectorAll(".keypad-btn, .submit-btn");
+  const PRESS_CLASS = "is-pressed";
+  const ACTIVE_FEEDBACK_CLASS = "feedback-active";
+  const MIN_PRESS_FEEDBACK_MS = 90;
+  const COLOR_HOLD_AFTER_RELEASE_MS = 140;
+  const HAPTIC_COOLDOWN_MS = 45;
+  const CLICK_AUDIO_COOLDOWN_MS = 30;
+
+  let lastKeystrokeTime = null;
+  let lastHapticTime = 0;
+  let lastClickAudioTime = 0;
+  let responseSequence = [];
+  let keystrokeLog = [];
+  let isSubmitting = false;
+  let responseStartTime = null;
+  let audioContext = null;
+  let clickNoiseBuffer = null;
+
+
+  function applyUIText() {
+  const text = uiTranslations[savedLanguage] || uiTranslations.ENG;
+
+  const patientAccessBtn = document.getElementById("patient-access-btn");
+  if (patientAccessBtn) {
+    patientAccessBtn.textContent = text.patientAccess;
+  }
+
+  const submitBtn = document.getElementById("submit-btn");
+  if (submitBtn) {
+    submitBtn.textContent = text.submit;
+  }
+
+  const submitBtnAlpha = document.getElementById("submit-btn-alpha");
+  if (submitBtnAlpha) {
+    submitBtnAlpha.textContent = text.submit;
+  }
+
+  const practiceLabel = document.getElementById("practice-label");
+  if (practiceLabel) {
+    practiceLabel.textContent = text.practiceLabel;
+}
+}
+
+  // Apply high contrast mode if enabled
+  document.addEventListener('DOMContentLoaded', function() {
+    const isHighContrast = localStorage.getItem('ppst-high-contrast') === 'true';
+    if (isHighContrast) {
+      document.body.classList.add('high-contrast');
+    }
+
+  });
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function triggerHaptic(duration) {
+    if (!("vibrate" in navigator)) {
+      return;
+    }
+
+    const now = performance.now();
+    if (now - lastHapticTime < HAPTIC_COOLDOWN_MS) {
+      return;
+    }
+
+    lastHapticTime = now;
+    navigator.vibrate(duration);
+  }
+
+  function isHighContrastModeEnabled() {
+    return document.body.classList.contains("high-contrast");
+  }
+
+  function ensureAudioContext() {
+    if (!window.AudioContext && !window.webkitAudioContext) {
+      return null;
+    }
+
+    if (!audioContext) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioContext = new AudioContextClass();
+    }
+
+    if (audioContext.state === "suspended") {
+      audioContext.resume();
+    }
+
+    return audioContext;
+  }
+
+  function getClickNoiseBuffer(context) {
+    if (clickNoiseBuffer && clickNoiseBuffer.sampleRate === context.sampleRate) {
+      return clickNoiseBuffer;
+    }
+
+    const bufferDuration = 0.03;
+    const frameCount = Math.max(1, Math.floor(context.sampleRate * bufferDuration));
+    const buffer = context.createBuffer(1, frameCount, context.sampleRate);
+    const channelData = buffer.getChannelData(0);
+
+    for (let index = 0; index < frameCount; index += 1) {
+      const decay = 1 - (index / frameCount);
+      channelData[index] = (Math.random() * 2 - 1) * decay;
+    }
+
+    clickNoiseBuffer = buffer;
+    return clickNoiseBuffer;
+  }
+
+  function playClickSound(button) {
+    const context = ensureAudioContext();
+    if (!context) {
+      return;
+    }
+
+    const now = performance.now();
+    if (now - lastClickAudioTime < CLICK_AUDIO_COOLDOWN_MS) {
+      return;
+    }
+
+    lastClickAudioTime = now;
+
+    const isSubmitButton = button.classList.contains("submit-btn");
+    const startTime = context.currentTime;
+    const noiseDuration = isSubmitButton ? 0.026 : 0.02;
+    const toneDuration = isSubmitButton ? 0.034 : 0.026;
+
+    const noiseSource = context.createBufferSource();
+    noiseSource.buffer = getClickNoiseBuffer(context);
+
+    const noiseFilter = context.createBiquadFilter();
+    noiseFilter.type = "highpass";
+    noiseFilter.frequency.setValueAtTime(isSubmitButton ? 1900 : 2300, startTime);
+    noiseFilter.Q.setValueAtTime(0.8, startTime);
+
+    const noiseGain = context.createGain();
+    noiseGain.gain.setValueAtTime(0.0001, startTime);
+    noiseGain.gain.exponentialRampToValueAtTime(isSubmitButton ? 0.16 : 0.12, startTime + 0.0025);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, startTime + noiseDuration);
+
+    const bodyOscillator = context.createOscillator();
+    bodyOscillator.type = "triangle";
+    bodyOscillator.frequency.setValueAtTime(isSubmitButton ? 820 : 1050, startTime);
+    bodyOscillator.frequency.exponentialRampToValueAtTime(isSubmitButton ? 340 : 420, startTime + toneDuration);
+
+    const bodyGain = context.createGain();
+    bodyGain.gain.setValueAtTime(0.0001, startTime);
+    bodyGain.gain.exponentialRampToValueAtTime(isSubmitButton ? 0.04 : 0.03, startTime + 0.003);
+    bodyGain.gain.exponentialRampToValueAtTime(0.0001, startTime + toneDuration);
+
+    noiseSource.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(context.destination);
+
+    bodyOscillator.connect(bodyGain);
+    bodyGain.connect(context.destination);
+
+    noiseSource.start(startTime);
+    noiseSource.stop(startTime + noiseDuration);
+    bodyOscillator.start(startTime);
+    bodyOscillator.stop(startTime + toneDuration);
+  }
+
+  function setColorFeedback(button, active) {
+    if (isHighContrastModeEnabled()) {
+      return;
+    }
+
+    if (button._colorFeedbackTimer) {
+      clearTimeout(button._colorFeedbackTimer);
+      button._colorFeedbackTimer = null;
+    }
+
+    if (active) {
+      button.classList.add(ACTIVE_FEEDBACK_CLASS);
+      return;
+    }
+
+    button._colorFeedbackTimer = window.setTimeout(() => {
+      button.classList.remove(ACTIVE_FEEDBACK_CLASS);
+      button._colorFeedbackTimer = null;
+    }, COLOR_HOLD_AFTER_RELEASE_MS);
+  }
+
+  function setPressedState(button, pressed) {
+    if (pressed) {
+      button._pressedAt = performance.now();
+      if (button._releaseTimer) {
+        clearTimeout(button._releaseTimer);
+        button._releaseTimer = null;
+      }
+      button.classList.add(PRESS_CLASS);
+      return;
+    }
+
+    const elapsed = button._pressedAt ? performance.now() - button._pressedAt : MIN_PRESS_FEEDBACK_MS;
+    const delay = Math.max(0, MIN_PRESS_FEEDBACK_MS - elapsed);
+
+    if (button._releaseTimer) {
+      clearTimeout(button._releaseTimer);
+    }
+
+    button._releaseTimer = window.setTimeout(() => {
+      button.classList.remove(PRESS_CLASS);
+      button._releaseTimer = null;
+    }, delay);
+  }
+
+  function attachButtonFeedback(button) {
+    const hapticDuration = button.classList.contains("submit-btn") ? 16 : 10;
+
+    button.addEventListener("pointerdown", () => {
+      setPressedState(button, true);
+      setColorFeedback(button, true);
+      triggerHaptic(hapticDuration);
+      playClickSound(button);
+    });
+
+    ["pointerup", "pointercancel", "pointerleave"].forEach((eventName) => {
+      button.addEventListener(eventName, () => {
+        setPressedState(button, false);
+        setColorFeedback(button, false);
+      });
+    });
+
+    button.addEventListener("keydown", (event) => {
+      if (event.key !== " " && event.key !== "Enter") {
+        return;
+      }
+
+      setPressedState(button, true);
+      setColorFeedback(button, true);
+      triggerHaptic(hapticDuration);
+      playClickSound(button);
+    });
+
+    ["keyup", "blur"].forEach((eventName) => {
+      button.addEventListener(eventName, () => {
+        setPressedState(button, false);
+        setColorFeedback(button, false);
+      });
+    });
+  }
+
+  // spoken map for TTS
+  function getSpokenText(symbol) {
+  const savedLanguage = localStorage.getItem('ppst-language') || 'ENG';
+
+  const englishMap = {
+    "0": "zero",
+    "1": "one",
+    "2": "two",
+    "3": "three",
+    "4": "four",
+    "5": "five",
+    "6": "six",
+    "7": "seven",
+    "8": "eight",
+    "9": "nine",
+    "A": "A",
+    "C": "C",
+    "F": "F",
+    "H": "H",
+    "L": "L",
+    "M": "M",
+    "Q": "Q",
+    "R": "R",
+    "W": "W",
+    "Y": "Y"
+  };
+
+  const spanishMap = {
+    "0": "cero",
+    "1": "uno",
+    "2": "dos",
+    "3": "tres",
+    "4": "cuatro",
+    "5": "cinco",
+    "6": "seis",
+    "7": "siete",
+    "8": "ocho",
+    "9": "nueve",
+    "A": "A",
+    "C": "C",
+    "F": "F",
+    "H": "H",
+    "L": "L",
+    "M": "M",
+    "Q": "Q",
+    "R": "R",
+    "W": "W",
+    "Y": "Y"
+  };
+
+  const frenchMap = {
+    "0": "zero",
+    "1": "un",
+    "2": "deux",
+    "3": "trois",
+    "4": "quatre",
+    "5": "cinq",
+    "6": "six",
+    "7": "sept",
+    "8": "huit",
+    "9": "neuf",
+    "A": "A",
+    "C": "C",
+    "F": "F",
+    "H": "H",
+    "L": "L",
+    "M": "M",
+    "Q": "Q",
+    "R": "R",
+    "W": "W",
+    "Y": "Y"
+  };
+
+  //const spokenMap = savedLanguage === 'ESP' ? spanishMap : englishMap;
+  let spokenMap = englishMap;
+  if (savedLanguage === 'ESP') {
+  spokenMap = spanishMap;
+} else if (savedLanguage === 'FRE') {
+  spokenMap = frenchMap;
+}
+  return spokenMap[symbol] || symbol;
+  }
+  
+
+function loadVoices() {
+    if (!("speechSynthesis" in window)) {
+        return;
+    }
+
+    const savedLanguage = localStorage.getItem('ppst-language') || 'ENG';
+    availableVoices = window.speechSynthesis.getVoices();
+
+    if (savedLanguage === 'ESP') {
+      selectedVoice =
+        availableVoices.find(v => v.lang === "es-US" && v.name.includes("Google")) ||
+        availableVoices.find(v => v.lang === "es-MX" && v.name.includes("Google")) ||
+        availableVoices.find(v => v.lang.startsWith("es") && v.name.includes("Google")) ||
+        availableVoices.find(v => v.lang.startsWith("es")) ||
+        null;
+    } 
+    else if (savedLanguage === 'FRE') {
+      selectedVoice =
+        availableVoices.find(v => v.lang === "fr-FR" && v.name.includes("Vivienne")) ||
+        availableVoices.find(v => v.lang === "fr-FR" && v.name.includes("Microsoft VivienneMultilingual Online")) ||
+        availableVoices.find(v => v.lang === "es-US" && v.name.includes("Google")) ||
+        availableVoices.find(v => v.lang.startsWith("es") && v.name.includes("Google")) ||
+        availableVoices.find(v => v.lang.startsWith("es")) ||
+        null;
+    }
+    else
+        {
+        selectedVoice = 
+      // Google US English appears the most ideal
+      // Female voice + most clear and natural sounding
+      // on chrome, however other browsers may find other voices 
+      // more suitable
+      // Might have to experiment with voices
+        availableVoices.find(v => v.name.includes("Google US English")) ||
+        availableVoices.find(v => v.name.includes("Microsoft Zira - English (United States)")) ||
+        availableVoices.find(v => v.name.includes("Zira")) ||
+        availableVoices.find(v => v.name.includes("Samantha")) ||
+        availableVoices.find(v => v.lang === "en-US" && v.name.toLowerCase().includes("female")) ||
+        availableVoices.find(v => v.lang === "en-US") ||
+        null;
+        }
+    
+    console.log("Saved language:", savedLanguage);
+    console.log("Available voices:", availableVoices.map(v => `${v.name} (${v.lang})`));
+    console.log("Selected voice:", selectedVoice ? `${selectedVoice.name} (${selectedVoice.lang})` : "default browser voice");
+}
+
+function initTTS() {
+  return new Promise((resolve) => {
+    if (!("speechSynthesis" in window)) {
+      resolve();
+      return;
+    }
+
+    loadVoices();
+
+    if (selectedVoice) {
+      resolve();
+      return;
+    }
+
+    const synth = window.speechSynthesis;
+
+    const handleVoicesChanged = () => {
+      loadVoices();
+      if (selectedVoice) {
+        synth.onvoiceschanged = null;
+        resolve();
+      }
+    };
+
+    synth.onvoiceschanged = handleVoicesChanged;
+
+    setTimeout(() => {
+      loadVoices();
+      synth.onvoiceschanged = null;
+      resolve();
+    }, 1000);
+  });
+}
+
+// Speech synthesis for TTS
+function speakSymbol(symbol) {
+
+
+  return new Promise((resolve) => {
+    if (!("speechSynthesis" in window)) {
+      resolve();
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(getSpokenText(symbol));
+    utterance.lang = TTS_LANG;
+    utterance.rate = TTS_RATE;
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+
+    utterance.onend = () => resolve();
+    utterance.onerror = () => resolve();
+
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+
+
+  function updateHiddenInputs() {
+    hiddenInput.value = responseSequence.join("");
+    keystrokeLogInput.value = JSON.stringify(keystrokeLog);
+  }
+
+  function addSymbol(symbol) {
+    responseSequence.push(symbol);
+    const now = performance.now();
+    let latencySeconds = null;
+
+    if (lastKeystrokeTime != null) {
+      latencySeconds= Number(((now - lastKeystrokeTime) / 1000).toFixed(3));
+    }
+
+    keystrokeLog.push({
+      key_pressed: symbol,
+      position: responseSequence.length,
+      latency: latencySeconds
+    });
+
+    lastKeystrokeTime = now;
+    updateHiddenInputs();
+  }
+
+  async function playSequence() {
+    for (const symbol of displayedSequence) {
+      stimulusSymbol.textContent = symbol;
+
+      // symbol spoken as it appears
+      await speakSymbol(symbol);
+      await sleep(SYMBOL_DURATION_MS);
+
+      stimulusSymbol.textContent = "";
+      // stop
+      await sleep(SYMBOL_GAP_MS);
+    }
+
+    responsePhase.style.display = "block";
+    responseStartTime = performance.now();
+    lastKeystrokeTime = responseStartTime;
+    updateHiddenInputs();
+  }
+
+  // low-pitch sound on keypad press for stimulus response feedback
+  function playKeySound() {
+    try {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.08);
+    } catch (e) {}
+  }
+
+  keypadButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      playKeySound();
+      addSymbol(button.dataset.symbol);
+    });
+  });
+
+  feedbackButtons.forEach((button) => {
+    attachButtonFeedback(button);
+  });
+
+  trialForm.addEventListener("submit", () => {
+    isSubmitting = true;
+    if (responseStartTime !==null) {
+      const totalLatencySeconds = (performance.now() - responseStartTime) / 1000;
+      latencyInput.value = totalLatencySeconds.toFixed(3);
+
+    } else {
+      latencyInput.value ="";
+    }
+
+    keystrokeLogInput.value = JSON.stringify(keystrokeLog);
+
+  });
+
+  function notifyAbort() {
+    if (isSubmitting || !abortUrl) {
+      return;
+    }
+
+    const payload = new FormData();
+    payload.append("test_id", testId);
+    navigator.sendBeacon(abortUrl, payload);
+  }
+
+ window.addEventListener("pagehide", notifyAbort);
+
+ document.addEventListener("DOMContentLoaded", async () => {
+  applyUIText();
+  await initTTS();
+  playSequence();
+});
+</script>
+{% endblock %}

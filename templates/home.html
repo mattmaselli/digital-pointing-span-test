@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <h1 class="hero-title">Philadelphia Pointing Span Test</h1>
+  <p class="hero-sub">
+    The PPST is a digital cognitive assessment designed to measure
+    functions such as memory, helping enhance early disease detection.
+  </p>
+  <a class="btn btn-secondary" href="{% url 'about' %}">Learn More</a>
+</div>
+{% endblock %}

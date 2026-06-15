@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block nav_about %}active{% endblock %}
+{% block content %}
+<div class="page-content" style="max-width:760px; margin:0 auto; text-align:center;">
+  <h1 class="hero-title" style="margin-bottom:1rem;">About the Philadelphia Pointing Span Test</h1>
+  <p style="color:var(--mid); line-height:1.75; margin-bottom:2rem;">
+    Our Philadelphia Pointing Span Test (PPST) web application allows for the digital
+    administration of assessments. The PPST digital system allows for medical professionals
+    to administer tests and securely capture valuable patient data to support future evaluation
+    and treatment. This application focuses on providing a user-friendly interface designed to
+    improve accessibility, including for patients who may otherwise have difficulty completing
+    the test. The PPST app is built with a strong emphasis on security, accessibility, and
+    operational efficiency.
+  </p>
+
+  <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-bottom:2rem;">
+
+    <button class="btn btn-secondary" onclick="document.getElementById('modal-accessibility').showModal()">
+      Accessibility Options
+    </button>
+    <button class="btn btn-secondary" onclick="document.getElementById('modal-security').showModal()">
+      More on our Security
+    </button>
+  </div>
+
+</div>
+
+
+<dialog id="modal-accessibility" aria-labelledby="modal-accessibility-title" aria-modal="true">
+  <div class="modal-inner">
+    <div class="modal-header">
+      <h2 id="modal-accessibility-title">Accessibility Options</h2>
+      <button class="modal-close" onclick="document.getElementById('modal-accessibility').close()" aria-label="Close">✕</button>
+    </div>
+    <p>Our accessibility options include features designed to improve usability for all users, including those with disabilities. These include multiple languages and high contrast mode.</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('modal-accessibility').close()">Close</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="modal-security" aria-labelledby="modal-security-title" aria-modal="true">
+  <div class="modal-inner">
+    <div class="modal-header">
+      <h2 id="modal-security-title">More on our Security</h2>
+      <button class="modal-close" onclick="document.getElementById('modal-security').close()" aria-label="Close">✕</button>
+    </div>
+    <p>The PPST app is built with a strong emphasis on security. Patient data will not be tracked other than patient age.</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('modal-security').close()">Close</button>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  dialog {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 0;
+    max-width: 480px;
+    width: 90%;
+    margin: auto;
+    top: 30%;
+    transform: translateY(-50%)
+  }
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+  }
+  .modal-inner {
+    padding: 1.5rem;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #666;
+    padding: 4px 8px;
+  }
+  .modal-footer {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('dialog').forEach(dialog => {
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+  });
+</script>
+{% endblock %}

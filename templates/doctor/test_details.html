@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Test Details{% endblock %}
+{% block nav_test_info %}active{% endblock %}
+
+{% block extra_styles %}
+.dash-wrap { max-width: 860px; width: 100%; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.4rem;
+  border-bottom: 2px solid var(--charcoal);
+  padding-bottom: .4rem;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.switch-test-wrap {
+  margin-bottom: 1.1rem;
+}
+
+.switch-test-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--mid);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.switch-test-select {
+  width: 100%;
+  max-width: 360px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.62rem 0.78rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--charcoal);
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.22rem 0.58rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.status-complete {
+  background: rgba(25, 135, 84, 0.12);
+  border-color: rgba(25, 135, 84, 0.35);
+  color: #146c43;
+}
+
+.status-incomplete {
+  background: rgba(13, 110, 253, 0.1);
+  border-color: rgba(13, 110, 253, 0.28);
+  color: #0a58ca;
+}
+
+.status-ended_early {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: rgba(220, 53, 69, 0.28);
+  color: #a52834;
+}
+
+.status-expired {
+  background: rgba(255, 193, 7, 0.16);
+  border-color: rgba(255, 193, 7, 0.35);
+  color: #8a6d00;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .9rem;
+}
+
+.details-box {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: .95rem 1.15rem;
+}
+
+.details-box h3 {
+  margin: 0 0 .65rem;
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.15rem;
+}
+
+.details-row {
+  color: var(--mid);
+  margin: 0 0 .45rem;
+  line-height: 1.45;
+}
+
+.details-row strong {
+  color: var(--charcoal);
+}
+
+.patient-link {
+  color: var(--blue);
+  word-break: break-all;
+}
+
+.link-actions {
+  margin-top: .55rem;
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+
+.copy-link-feedback {
+  color: var(--mid);
+  font-size: .85rem;
+}
+
+.details-actions {
+  margin-top: 1rem;
+}
+
+@media (max-width: 760px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.download-btn {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 0.5rem 0.9rem;
+  background-color: var(--blue);
+  color: var(--white);
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+{% endblock %}
+
+{% block content %}
+<div class="dash-wrap">
+  <div class="switch-test-wrap">
+    <label class="switch-test-label" for="switchTestSelect">Switch Test</label>
+    <select
+      id="switchTestSelect"
+      class="switch-test-select"
+      onchange="if(this.value){window.location.href=this.value;}"
+    >
+      {% for doctor_test in doctor_tests %}
+      <option
+        value="{% url 'doctor:test_details' doctor_test.id %}"
+        {% if doctor_test.id == test.id %}selected{% endif %}
+      >
+        Test #{{ doctor_test.id }} (Age {{ doctor_test.patient_age }}) - {{ doctor_test.get_status_display }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <h2 class="section-title">Test #{{ test.id }} Details</h2>
+
+  <div class="details-grid">
+    <div class="details-box">
+      <h3>Test Details</h3>
+      <p class="details-row"><strong>Test ID:</strong> {{ test.id }}</p>
+      <p class="details-row"><strong>Status:</strong> <span class="status-chip status-{{ test.status|lower }}">{{ test.get_status_display }}</span></p>
+      <p class="details-row"><strong>Patient Age:</strong> {{ test.patient_age }}</p>
+      <p class="details-row"><strong>Date Created:</strong> {{ test.created_at|date:"M d, Y H:i" }}</p>
+      <p class="details-row">
+        <strong>Patient Link:</strong>
+        <a id="patientLinkText" class="patient-link" href="{{ patient_link }}">{{ patient_link }}</a>
+        <span class="link-actions">
+          <button id="copyPatientLinkBtn" type="button" class="btn btn-ghost btn-sm" aria-label="Copy patient link">Copy Link</button>
+          <span id="copyLinkFeedback" class="copy-link-feedback" aria-live="polite"></span>
+        </span>
+      </p>
+    </div>
+
+    <div class="details-box">
+      <h3>Test Results</h3>
+      <p class="details-row"><strong>Mean Latency:</strong>
+        {% if mean_latency is not None %}{{ mean_latency|floatformat:2 }}{% else %}N/A{% endif %}
+      </p>
+      <p class="details-row"><strong>Correct Response Percentage:</strong>
+        {% if correct_response_percentage is not None %}{{ correct_response_percentage|floatformat:1 }}%{% else %}N/A{% endif %}
+      </p>
+      <p class="details-row"><strong>Time Taken:</strong> {{ time_taken|default:"N/A" }}</p>
+      <div style="margin-top: 15px;">
+      <a href="{% url 'patient:export_csv' test_id=test.id %}" class="download-btn">
+      Download CSV
+      </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="details-actions">
+    <a class="btn btn-secondary" href="{% url 'doctor:dashboard' %}">Back to Dashboard</a>
+  </div>
+</div>
+
+<script>
+  const copyPatientLinkBtn = document.getElementById('copyPatientLinkBtn');
+  const patientLinkText = document.getElementById('patientLinkText');
+  const copyLinkFeedback = document.getElementById('copyLinkFeedback');
+
+  if (copyPatientLinkBtn && patientLinkText && copyLinkFeedback) {
+    copyPatientLinkBtn.addEventListener('click', async () => {
+      const urlToCopy = patientLinkText.href;
+      try {
+        await navigator.clipboard.writeText(urlToCopy);
+        copyLinkFeedback.textContent = 'Copied';
+      } catch (error) {
+        copyLinkFeedback.textContent = 'Copy failed';
+      }
+
+      setTimeout(() => {
+        copyLinkFeedback.textContent = '';
+      }, 1200);
+    });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Taking Test{% endblock %}
+
+{% block nav %}
+<nav>
+  <a class="nav-brand" href="{% url 'home' %}">
+    <span class="brain-icon">🧠</span> PPST
+  </a>
+  
+  <div class="nav-spacer"></div>
+  <button class="btn-nav-outline">Patient Access</button>
+</nav>
+
+{% endblock %}
+
+{% block content %}
+<div class="page-content" style="padding: 50px; text-align: center;">
+  <h1 class="hero-title" style="font-size: 2.4em; margin-bottom: 20px;">Test #{{ test.id }}</h1>
+  <p class="hero-sub" style="max-width: 650px; font-size: 1.1em; margin-bottom: 30px;">
+    Demo test page is now wired. In production this section will render generated trials and collect
+    real response and keystroke data.
+  </p>
+
+  <div class="card" style="max-width: 700px; width: 100%; margin: 0 auto 30px; text-align: left;">
+    <h3 style="margin-bottom: 12px;">Sample Prompt</h3>
+    <p style="margin-bottom: 16px; color: var(--mid);">Memorize this sequence: <strong>4 7 2 9</strong></p>
+    <label for="response">Enter the sequence</label>
+    <input id="response" type="text" placeholder="Type your answer" style="margin-top: 8px;" />
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit">Submit Test</button>
+  </form>
+</div>
+{% endblock %}

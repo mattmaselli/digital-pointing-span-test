@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block nav %}
+<nav>
+  <a class="nav-brand" style="cursor: default;">
+    <span class="brain-icon">🧠</span> PPST
+  </a>
+  
+  <a class="nav-link {% block nav_test %}active{% endblock %}" id="nav-written-instructions" href="{% url 'patient:written_instructions' test.id %}">Instructions</a>
+  <div class="nav-spacer"></div>
+  <button class="btn-nav-outline" id="patient-access-btn">Patient Access</button>
+</nav>
+{% endblock %}
+
+{% block content %}
+<style>
+  .lang-pill {
+    display: none !important;
+  }
+  
+  .instructions-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    text-align: left;
+  }
+
+  .instructions-box {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 40px;
+    box-shadow: var(--shadow);
+    margin-bottom: 40px;
+  }
+
+  .instructions-list {
+    font-size: 1.2em;
+    line-height: 1.8;
+    margin: 20px 0;
+  }
+
+  .instructions-list li {
+    margin-bottom: 15px;
+  }
+
+  .highlight {
+    text-decoration: underline;
+    font-weight: bold;
+  }
+
+  /* High Contrast Mode Coloring */
+  body.high-contrast {
+    --bg: #000000;
+    --white: #000000;
+    --charcoal: #ffffff;
+    --mid: #ffffff;
+    --muted: #cccccc;
+    --border: #ffffff;
+    --blue: #ffff00;
+    --blue-dark: #ffcc00;
+    --blue-light: #333300;
+    --shadow: 0 2px 12px rgba(255,255,255,0.3);
+    --shadow-lg: 0 8px 32px rgba(255,255,255,0.4);
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  body.high-contrast .instructions-box {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: 2px solid #ffffff;
+  }
+
+  body.high-contrast .highlight {
+    text-decoration: underline;
+    color: #ffffff !important;
+  }
+
+  body.high-contrast .page-content {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  body.high-contrast .hero-title {
+    color: #ffffff !important;
+  }
+
+  body.high-contrast nav {
+    background-color: #000000 !important;
+    border-bottom: 2px solid #ffffff !important;
+  }
+
+  body.high-contrast .nav-brand,
+  body.high-contrast .nav-link,
+  body.high-contrast .btn-nav-outline {
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+  }
+
+  body.high-contrast .btn-nav-outline {
+    background-color: #000000 !important;
+    border: 2px solid #ffffff !important;
+  }
+
+  body.high-contrast .btn-nav-outline:hover {
+    background-color: #ffff00 !important;
+    color: #000000 !important;
+  }
+
+  body.high-contrast .btn-secondary {
+    background-color: #ffff00 !important;
+    color: #000000 !important;
+    border: 2px solid #ffffff;
+  }
+
+  body.high-contrast .btn-secondary:hover {
+    background-color: #ffcc00 !important;
+    color: #000000 !important;
+  }
+</style>
+
+<div class="page-content" style="padding: 50px; text-align: center;">
+  <h1 class="hero-title" id="page-title" style="font-size: 3em; margin-bottom: 30px;">Test Instructions</h1>
+  
+  <div class="instructions-container">
+    <div class="instructions-box">
+      <h2 id="what-to-expect-title" style="font-size: 1.8em; margin-bottom: 20px; color: var(--blue); text-align: center;">What to Expect</h2>
+      
+      <ul class="instructions-list" id="instructions-list">
+        <li id="instruction-1">On the following page, you will see a <span class="highlight">video explanation</span> of how the test works.</li>
+        <li id="instruction-2">After watching the video, you will have the opportunity to complete <span class="highlight">practice questions</span> that will familiarize you with the test format.</li>
+        <li id="instruction-3">These practice questions <span class="highlight">will not be counted</span> towards your final results. They are just for practice.</li>
+        <li id="instruction-4">Once you complete the practice section, the <span class="highlight">real test will begin</span>.</li>
+        <li id="instruction-5">During the test, you will need to pay close attention and <span class="highlight">press the buttons in the same order</span> as the numbers or letters that appear on your screen.</li>
+        <li id="instruction-6">Do your best to be as <span class="highlight">accurate and quick</span> as possible during the real test portion.</li>
+      </ul>
+
+      <div style="background-color: var(--blue-light); padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center;">
+        <p id="remember-text" style="font-size: 1.1em; margin: 0; font-weight: bold;">Focus on accuracy first, then speed!</p>
+      </div>
+    </div>
+    
+    <div style="text-align: center;">
+      <a class="btn btn-secondary btn-large" id="continue-btn" style="font-size: 1.8em; padding: 20px 50px;" href="{% url 'patient:instructions' test.id %}">Continue to Video</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// Apply high contrast mode if enabled  
+document.addEventListener('DOMContentLoaded', function() {
+    const isHighContrast = localStorage.getItem('ppst-high-contrast') === 'true';
+    if (isHighContrast) {
+        document.body.classList.add('high-contrast');
+    }
+
+    const savedLanguage = localStorage.getItem('ppst-language') || 'ENG';
+
+    const translations = {
+        ENG: {
+            navHome: "Home",
+            navAbout: "About",
+            navWrittenInstructions: "Instructions",
+            patientAccess: "Patient Access",
+            pageTitle: "Test Instructions",
+            whatToExpectTitle: "What to Expect",
+            instruction1: "On the following page, you will see a video explanation of how the test works.",
+            instruction2: "After watching the video, you will have the opportunity to complete practice questions that will familiarize you with the test format.",
+            instruction3: "These practice questions will not be counted towards your final results. They are just for practice.",
+            instruction4: "Once you complete the practice section, the real test will begin.",
+            instruction5: "During the test, you will need to pay close attention and press the buttons in the same order as the numbers or letters that appear on your screen.",
+            instruction6: "Do your best to be as accurate and quick as possible during the real test portion.",
+            rememberText: "Focus on accuracy first, then speed!",
+            continue: "Continue to Video"
+        },
+        ESP: {
+            navHome: "Inicio",
+            navAbout: "Acerca de",
+            navWrittenInstructions: "Instrucciones",
+            patientAccess: "Acceso del paciente",
+            pageTitle: "Instrucciones de la prueba",
+            whatToExpectTitle: "Qué esperar",
+            instruction1: "En la siguiente página, verá una explicación en video de cómo funciona la prueba.",
+            instruction2: "Después de ver el video, tendrá la oportunidad de completar preguntas de práctica que lo familiarizarán con el formato de la prueba.",
+            instruction3: "Estas preguntas de práctica no contarán para sus resultados finales. Son solo para practicar.",
+            instruction4: "Una vez que complete la sección de práctica, comenzará la prueba real.",
+            instruction5: "Durante la prueba, deberá prestar mucha atención y presionar los botones en el mismo orden que los números o letras que aparecen en su pantalla.",
+            instruction6: "Haga su mejor esfuerzo para ser lo más preciso y rápido posible durante la parte de la prueba real.",
+            rememberText: "¡Concéntrese primero en la precisión, luego en la velocidad!",
+            continue: "Continuar al video"
+        },
+        FRE: {
+            navHome: "Page d'accueil",
+            navAbout: "À propos de",
+            navWrittenInstructions: "Instructions",
+            patientAccess: "Accès des patients",
+            pageTitle: "Instructions pour le test",
+            whatToExpectTitle: "À quoi s'attendre",
+            instruction1: "Sur la page suivante, vous verrez une vidéo expliquant le fonctionnement du test.",
+            instruction2: "Après avoir visionné la vidéo, vous aurez l'occasion de répondre à des questions d'entraînement qui vous familiariseront avec le format du test.",
+            instruction3: "Ces questions d'entraînement ne seront pas prises en compte dans vos résultats finaux. Elles servent uniquement à la pratique.",
+            instruction4: "Une fois que vous aurez terminé la section d'entraînement, le véritable test commencera.",
+            instruction5: "Pendant le test, vous devrez être très attentif et appuyer sur les boutons dans le même ordre que les chiffres ou les lettres qui apparaissent sur votre écran.",
+            instruction6: "Faites de votre mieux pour être aussi précis et rapide que possible durant la partie réelle du test.",
+            rememberText: "Privilégiez d'abord la précision, puis la vitesse!",
+            continue: "Continuer vers la vidéo"
+        }
+    };
+
+    function applyLanguage(language) {
+        const text = translations[language] || translations.ENG;
+
+        
+        document.getElementById('nav-written-instructions').textContent = text.navWrittenInstructions;
+        document.getElementById('patient-access-btn').textContent = text.patientAccess;
+        document.getElementById('page-title').textContent = text.pageTitle;
+        document.getElementById('what-to-expect-title').textContent = text.whatToExpectTitle;
+        document.getElementById('instruction-1').innerHTML = text.instruction1.replace('video explanation', '<span class="highlight">video explanation</span>');
+        document.getElementById('instruction-2').innerHTML = text.instruction2.replace('practice questions', '<span class="highlight">practice questions</span>');
+        document.getElementById('instruction-3').innerHTML = text.instruction3.replace('will not be counted', '<span class="highlight">will not be counted</span>').replace('no contarán', '<span class="highlight">no contarán</span>');
+        document.getElementById('instruction-4').innerHTML = text.instruction4.replace('real test will begin', '<span class="highlight">real test will begin</span>').replace('comenzará la prueba real', '<span class="highlight">comenzará la prueba real</span>');
+        document.getElementById('instruction-5').innerHTML = text.instruction5.replace('press the buttons in the same order', '<span class="highlight">press the buttons in the same order</span>').replace('presionar los botones en el mismo orden', '<span class="highlight">presionar los botones en el mismo orden</span>');
+        document.getElementById('instruction-6').innerHTML = text.instruction6.replace('accurate and quick', '<span class="highlight">accurate and quick</span>').replace('preciso y rápido', '<span class="highlight">preciso y rápido</span>');
+        document.getElementById('remember-text').textContent = text.rememberText;
+        document.getElementById('continue-btn').textContent = text.continue;
+    }
+
+    applyLanguage(savedLanguage);
+});
+</script>
+{% endblock %}

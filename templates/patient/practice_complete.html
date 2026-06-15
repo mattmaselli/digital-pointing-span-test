@@ -1,0 +1,136 @@
+{% extends "patient/base_patient.html" %}
+{% block title %}Practice Complete{% endblock %}
+
+{% block nav %}
+<nav>
+  <a class="nav-brand" style="cursor: default;">
+    <span class="brain-icon">🧠</span> PPST
+  </a>
+  
+  <div class="nav-spacer"></div>
+  <button class="btn-nav-outline" id ="patient-access-btn">Patient Access</button>
+</nav>
+{% endblock %}
+
+{% block content %}
+<style>
+  /* High Contrast Mode Coloring */
+  body.high-contrast {
+    --bg: #000000;
+    --white: #000000;
+    --charcoal: #ffffff;
+    --mid: #ffffff;
+    --muted: #cccccc;
+    --border: #ffffff;
+    --blue: #ffff00;
+    --blue-dark: #ffcc00;
+    --blue-light: #333300;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  body.high-contrast .page-content {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  body.high-contrast .hero-title {
+    color: #ffffff !important;
+  }
+
+  body.high-contrast .btn-secondary {
+    background-color: #ffff00 !important;
+    color: #000000 !important;
+    border: 2px solid #ffffff;
+  }
+
+  body.high-contrast .btn-secondary:hover {
+    background-color: #ffcc00 !important;
+    color: #000000 !important;
+  }
+
+  body.high-contrast nav {
+    background-color: #000000 !important;
+    border-bottom: 2px solid #ffffff !important;
+  }
+
+  body.high-contrast .nav-brand,
+  body.high-contrast .nav-link,
+  body.high-contrast .btn-nav-outline {
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+  }
+
+  body.high-contrast .btn-nav-outline {
+    background-color: #000000 !important;
+    border: 2px solid #ffffff !important;
+  }
+
+  body.high-contrast .btn-nav-outline:hover {
+    background-color: #ffff00 !important;
+    color: #000000 !important;
+  }
+</style>
+
+<div class="page-content" style="text-align:center;">
+  <div style="font-size:4rem; margin-bottom:1rem;">✅</div>
+  <h1 class="hero-title" id="page-title">Practice Complete</h1>
+  <p id="complete-subtitle" style="font-size:1.15rem; color:var(--blue); font-weight:600; margin-bottom:.8rem;">
+    Great job! You have completed the practice questions.
+  </p>
+  <p id ="complete-description" style="color:var(--mid); max-width:380px; line-height:1.7;">
+    When you are ready, press the button below to begin the actual test. Your responses will now be recorded.
+  </p>
+  <form method="post" style="margin-top:2rem;">
+    {% csrf_token %}
+    <button class="btn btn-secondary" id = "begin-test-btn" style="font-size:1.4em; padding:18px 50px;" type="submit">Begin Test</button>
+  </form>
+</div>
+
+<script>
+// Apply high contrast mode if enabled
+document.addEventListener('DOMContentLoaded', function() {
+    const isHighContrast = localStorage.getItem('ppst-high-contrast') === 'true';
+    if (isHighContrast) {
+        document.body.classList.add('high-contrast');
+    }
+
+    const savedLanguage = localStorage.getItem('ppst-language') || 'ENG';
+
+    const translations = {
+        ENG: {
+            patientAccess: "Patient Access",
+            title: "Practice Complete",
+            subtitle: "Great job! You have completed the practice questions.",
+            description: "When you are ready, press the button below to begin the actual test. Your responses will now be recorded.",
+            button: "Begin Test"
+        },
+        ESP: {
+            patientAccess: "Acceso del paciente",
+            title: "Práctica completada",
+            subtitle: "¡Buen trabajo! Ha completado las preguntas de práctica.",
+            description: "Cuando esté listo, presione el botón a continuación para comenzar la prueba real. Sus respuestas ahora serán registradas.",
+            button: "Comenzar prueba"
+        },
+        FRE: {
+            patientAccess: "Accès patient",
+            title: "Pratique terminée",
+            subtitle: "Bon travail ! Vous avez terminé les questions de pratique.",
+            description: "Lorsque vous êtes prêt, appuyez sur le bouton ci-dessous pour commencer le test réel. Vos réponses seront maintenant enregistrées.",
+            button: "Commencer le test"
+        }
+    };
+
+    const text = translations[savedLanguage] || translations.ENG;
+
+    document.getElementById('patient-access-btn').textContent = text.patientAccess;
+    document.getElementById('page-title').textContent = text.title;
+    document.getElementById('complete-subtitle').textContent = text.subtitle;
+    document.getElementById('complete-description').textContent = text.description;
+    document.getElementById('begin-test-btn').textContent = text.button;
+
+
+  
+});
+</script>
+{% endblock %}

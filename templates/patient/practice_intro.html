@@ -1,0 +1,132 @@
+{% extends "patient/base_patient.html" %}
+{% block title %}Practice Questions{% endblock %}
+
+{% block nav %}
+<nav>
+  <a class="nav-brand" style="cursor: default;">
+    <span class="brain-icon">🧠</span> PPST
+  </a>
+ 
+  <div class="nav-spacer"></div>
+  <button class="btn-nav-outline" id ="patient-access-btn">Patient Access</button>
+</nav>
+{% endblock %}
+
+{% block content %}
+<style>
+  /* High Contrast Mode Coloring */
+  body.high-contrast {
+    --bg: #000000;
+    --white: #000000;
+    --charcoal: #ffffff;
+    --mid: #ffffff;
+    --muted: #cccccc;
+    --border: #ffffff;
+    --blue: #ffff00;
+    --blue-dark: #ffcc00;
+    --blue-light: #333300;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+
+  body.high-contrast .page-content {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  body.high-contrast .hero-title {
+    color: #ffffff !important;
+  }
+
+  body.high-contrast .btn-secondary {
+    background-color: #ffff00 !important;
+    color: #000000 !important;
+    border: 2px solid #ffffff;
+  }
+
+  body.high-contrast .btn-secondary:hover {
+    background-color: #ffcc00 !important;
+    color: #000000 !important;
+  }
+
+  body.high-contrast nav {
+    background-color: #000000 !important;
+    border-bottom: 2px solid #ffffff !important;
+  }
+
+  body.high-contrast .nav-brand,
+  body.high-contrast .nav-link,
+  body.high-contrast .btn-nav-outline {
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+  }
+
+  body.high-contrast .btn-nav-outline {
+    background-color: #000000 !important;
+    border: 2px solid #ffffff !important;
+  }
+
+  body.high-contrast .btn-nav-outline:hover {
+    background-color: #ffff00 !important;
+    color: #000000 !important;
+  }
+</style>
+
+<div class="page-content" style="text-align:center;">
+  <h1 class="hero-title" id="page-title">Practice Questions</h1>
+  <p id = "practice-subtitle" style="font-size:1.15rem; color:var(--blue); font-weight:600; margin-bottom:.8rem;">
+    You will now be shown 4 practice questions.
+  </p>
+  <p id="practice-description" style="color:var(--mid); max-width:380px; line-height:1.7;">
+    These questions do not count towards your test results. They are here to help you get familiar with the test format.
+  </p>
+  <div style="margin-top:2rem;">
+    <a class="btn btn-secondary" id ="start-practice-btn" style="font-size:1.4em; padding:18px 50px;" href="{% url 'patient:practice' test.id 1 %}">Start Practice</a>
+  </div>
+</div>
+
+<script>
+// Apply high contrast mode if enabled
+document.addEventListener('DOMContentLoaded', function() {
+    const isHighContrast = localStorage.getItem('ppst-high-contrast') === 'true';
+    if (isHighContrast) {
+        document.body.classList.add('high-contrast');
+    }
+
+ const savedLanguage = localStorage.getItem('ppst-language') || 'ENG';
+
+ const translations = {
+        ENG: {
+            patientAccess: "Patient Access",
+            title: "Practice Questions",
+            subtitle: "You will now be shown 4 practice questions.",
+            description: "These questions do not count towards your test results. They are here to help you get familiar with the test format.",
+            button: "Start Practice"
+        },
+        ESP: {
+            patientAccess: "Acceso del paciente",
+            title: "Preguntas de práctica",
+            subtitle: "Ahora se le mostrarán 4 preguntas de práctica.",
+            description: "Estas preguntas no cuentan para los resultados de su prueba. Están aquí para ayudarle a familiarizarse con el formato.",
+            button: "Comenzar práctica"
+        },
+        FRE: {
+            patientAccess: "Accès patient",
+            title: "Questions de pratique",
+            subtitle: "Vous verrez maintenant 4 questions de pratique.",
+            description: "Ces questions ne comptent pas dans vos résultats. Elles servent à vous familiariser avec le format du test.",
+            button: "Commencer la pratique"
+        }
+    };
+
+    const text = translations[savedLanguage] || translations.ENG;
+
+    document.getElementById('patient-access-btn').textContent = text.patientAccess;
+    document.getElementById('page-title').textContent = text.title;
+    document.getElementById('practice-subtitle').textContent = text.subtitle;
+    document.getElementById('practice-description').textContent = text.description;
+    document.getElementById('start-practice-btn').textContent = text.button;
+
+});
+</script>
+{% endblock %}
