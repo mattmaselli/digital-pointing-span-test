@@ -1,0 +1,21 @@
+#====Requirements====
+
+#1. The webapp will offer a user-friendly interface for patients to independently take the PPST.
+#2. The webapp will function as desired on at least one browser for Android, iOS, Windows, and macOS.
+#3. The webapp will be implemented using the Django web framework (at https://www.djangoproject.com/).
+#4. The PPST patient interface will be free of distractions (to the extent possible), responsive, and will provide a consistent user experience across different screen sizes.
+#5. Test givers (doctors) will be able to login to the portal, create web links for patients to take the test, and review patient test results for tests that have completed, determine which tests have yet to be taken etc.
+#6. Upon visiting the web link sent by their doctor, the patient will be able to take the PPST.
+#7. Patients provide their response to a stimulus by clicking on symbol icons that are displayed on the screen. Auditory and visual feedback is provided for patient clicks.
+#8. To accommodate patients with impairment(s), stimuli will be presented both visually and auditorily. Patients will be provided some choices for the voice that presents the stimulus
+#and will be able to configure the same at the beginning of the test.
+#9. To make the test more accessible, the PPST patient interface will be available in at least two languages (e.g. English, Spanish) A test giver will be able to configure the language in which
+#the test will be presented to the patient.
+#10. The patient will be provided two practice stimuli before the six digit stimuli, and two practice stimuli before the six mixed stimuli. All patients will be provided with the same stimuli, though the order of presentation may vary.
+#11. The webapp will accurately gather and record patient responses as well as their latencies.
+#Upon completion of the test, only the test giver will be able to download the scored results of the test in spreadsheet format. A PPST spreadsheet will provide raw patient data such as responses, response latencies, as well as derived outcome measures such as the correct response percentage etc. (to be discussed further).
+#12. To safeguard patient privacy, the web application will not collect patient identifying
+#information. Patients can take the test anonymously, ensuring their personal data remains
+#confidential. Only the patient’s age is provided, which enables the webapp to compute
+#performance statistics by age bracket and present such information in webpages that feature patient test results and within patient spreadsheets. Test givers will be able to view these statistics on the website.
+#
